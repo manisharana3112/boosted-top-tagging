@@ -9,8 +9,8 @@ import h5py
 # ==========================================
 # 1. Configuration
 # ==========================================
-INPUT_DIR = "/home/sachit/ML/data/jetclass"
-OUTPUT_DIR = "/home/sachit/ML/processed_data/jetclass_1M"
+INPUT_DIR = "/mnt/c/Users/ranam/Downloads/JetClass_Pythia_train_100M_part0"
+OUTPUT_DIR = "/mnt/c/Users/ranam/Downloads/JetClass_Pythia_train_100M_part0/upart_dataset_1M"
 MASTER_H5_PATH = os.path.join(OUTPUT_DIR, "upart_dataset_1M.h5")
 
 STEP_SIZE = 25000

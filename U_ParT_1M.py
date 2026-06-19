@@ -15,10 +15,10 @@ import math
 # 1. Configuration
 # ==========================================
 # Update this path to point to your actual 2M (or 1M) dataset
-H5_DATA_PATH = "/home/sachit/ML/processed_data/jetclass_1M/upart_dataset_1M.h5" 
-RESULTS_DIR = "/home/sachit/ML/jetclass_Results_1M/UParT_1"
+H5_DATA_PATH = "/mnt/c/Users/ranam/Downloads/JetClass_Pythia_train_100M_part0/upart_dataset_1M/upart_dataset_1M.h5" 
+RESULTS_DIR = "/mnt/c/Users/ranam/Downloads/JetClass_Pythia_train_100M_part0/upart_dataset_1M/UParT_1"
 
-BATCH_SIZE = 1024  # Drop to 512 if you hit an OOM error
+BATCH_SIZE = 256  # Drop to 512 if you hit an OOM error
 EPOCHS = 20
 LEARNING_RATE = 0.001
 

@@ -15,17 +15,17 @@ import math
 # 1. Configuration
 # ==========================================
 # Update this path to point to your actual 2M (or 1M) dataset
-H5_DATA_PATH = "/mnt/c/Users/ranam/Downloads/JetClass_Pythia_train_100M_part0/upart_dataset_1M/upart_dataset_1M.h5" 
-RESULTS_DIR = "/mnt/c/Users/ranam/Downloads/JetClass_Pythia_train_100M_part0/upart_dataset_1M/UParT_1"
+H5_DATA_PATH = "/wd/users/d23021/JetClass_Pythia_train_100M_part0/upart_dataset_1M/upart_dataset_1M.h5" 
+RESULTS_DIR = "/wd/users/d23021/JetClass_Pythia_train_100M_part0/upart_dataset_1M/UParT_1"
 
-BATCH_SIZE = 256  # Drop to 512 if you hit an OOM error
+BATCH_SIZE = 256        # 1080 Ti can handle this cleanly
 EPOCHS = 20
 LEARNING_RATE = 0.001
 
 # UParT Hyperparameters
-EMBED_DIM = 128
-NUM_HEADS = 8
-NUM_LAYERS = 4
+EMBED_DIM = 128         # Keep — fits fine with 11GB
+NUM_HEADS = 8           # Keep
+NUM_LAYERS = 4          # Keep
 N_FEATURES = 17
 N_INTERACTIONS = 4
 
@@ -239,7 +239,7 @@ def get_model_scores(model, dataloader, device, desc="Evaluating"):
 			inter = inter.to(device, non_blocking=True)
 			m = m.to(device, non_blocking=True)
 			
-			with torch.amp.autocast('cuda'):
+			with torch.cuda.amp.autocast():
 				probs = torch.sigmoid(model(f, inter, m)).cpu().numpy()
 				
 			all_probs.extend(probs.flatten())
@@ -265,15 +265,18 @@ def run_training():
 	
 	# Set num_workers=0 to prevent h5py deadlocks. Pin memory ensures fast CPU->GPU transfer.
 	# Using 6 workers safely with dataset sharding
-	train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, num_workers=6, pin_memory=True, prefetch_factor=2)
-	val_loader = DataLoader(val_data, batch_size=BATCH_SIZE, num_workers=6, pin_memory=True, prefetch_factor=2)
-	test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, num_workers=6, pin_memory=True, prefetch_factor=2)
-	
+	train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, 
+                          num_workers=0, pin_memory=True)
+	val_loader   = DataLoader(val_data,   batch_size=BATCH_SIZE, 
+							num_workers=0, pin_memory=True)
+	test_loader  = DataLoader(test_data,  batch_size=BATCH_SIZE, 
+							num_workers=0, pin_memory=True)
+		
 	model = UParT().to(device)
 	optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 	criterion = nn.BCEWithLogitsLoss()
 
-	scaler = torch.amp.GradScaler('cuda')
+	scaler = torch.cuda.amp.GradScaler()
 	history = {'train_loss': [], 'val_loss': []}
 
 	# Checkpointing Setup
@@ -299,7 +302,7 @@ def run_training():
 			
 			optimizer.zero_grad()
 			
-			with torch.amp.autocast('cuda'):
+			with torch.cuda.amp.autocast():
 				out = model(f_feat, inter, m)
 				loss = criterion(out, y)
 			
@@ -334,7 +337,7 @@ def run_training():
 				m = m.to(device, non_blocking=True)
 				y = y.to(device, non_blocking=True)
 				
-				with torch.amp.autocast('cuda'):
+				with torch.cuda.amp.autocast():
 					out = model(f_feat, inter, m)
 					v_loss = criterion(out, y).item()
 					
